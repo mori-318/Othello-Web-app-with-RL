@@ -104,6 +104,11 @@ class Othello:
             self.player = opponent(self.player)
 
     def terminal(self) -> bool:
+        """
+        終局かを返す
+        Returns:
+            bool: 終局か
+        """
         if self.legal_moves(BLACK): return False
         if self.legal_moves(WHITE): return False
         return True
