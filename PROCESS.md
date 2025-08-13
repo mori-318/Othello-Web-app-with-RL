@@ -156,9 +156,9 @@ DBスキーマ（簡易案）
 - [x] 0. リポジトリ初期化
   - [x] ルートに `compose.yaml` の雛形、`PROCESS.md` 作成
 
-- [ ] 1. ルールエンジン（backend `app/domain/othello/`）
-  - [ ] 盤面・合法手・反転・パス・終局・スコアの関数実装
-  - [ ] pytestで網羅的ユニットテスト
+- [x] 1. ルールエンジン（backend `app/domain/othello/`）
+  - [x] 盤面・合法手・反転・パス・終局・スコアの関数実装
+  - [x] pytestで網羅的ユニットテスト
   - 確認: `pytest -q` が緑、境界ケース（角、端、全埋め）が通る
 
 - [ ] 2. APIスケルトン（`/api/v1`）
