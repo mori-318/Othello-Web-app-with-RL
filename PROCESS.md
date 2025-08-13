@@ -137,10 +137,10 @@ DBスキーマ（簡易案）
 
 ## Docker / Compose 方針（ドラフト）
 
-- サービス
-  - `backend`: uvicornでFastAPI起動、`AGENT_MODEL_PATH` 等の環境変数
-  - `frontend`: Vite dev / build本番。開発中はホットリロード
-  - `db`: postgres:16、永続化volume
+- サービス（それぞれ専用 `Dockerfile` を用意し、Compose の `build:` で参照）
+  - `backend`: `Dockerfile` で依存インストール後 `uvicorn` 起動（`AGENT_MODEL_PATH` 等の環境変数）
+  - `frontend`: `Dockerfile` で `npm ci` → `npm run dev`（本番は `npm run build && npm run preview`）
+  - `db`: postgres:16（公式イメージ）、永続化 volume
 - ネットワーク
   - `frontend` → `backend`（REST/WS） → `db`
 - ポート
@@ -153,10 +153,8 @@ DBスキーマ（簡易案）
 
 ## 手順（ToDoリスト｜各ステップの確認/テスト込み）
 
-- [ ] 0. リポジトリ初期化
-  - [ ] ルートに `docker-compose.yml` の雛形、`PROCESS.md` 作成
-
-  - 確認: 文書がレビュー可能
+- [x] 0. リポジトリ初期化
+  - [x] ルートに `compose.yaml` の雛形、`PROCESS.md` 作成
 
 - [ ] 1. ルールエンジン（backend `app/domain/othello/`）
   - [ ] 盤面・合法手・反転・パス・終局・スコアの関数実装
@@ -180,6 +178,7 @@ DBスキーマ（簡易案）
   - [ ] backend用 `Dockerfile`（uvicorn起動）
   - [ ] frontend用 `Dockerfile`（dev or build）
   - [ ] postgresサービス、初期化
+  - [ ] `compose.yaml` に `build: ./backend` / `build: ./frontend` を設定
   - 確認: `docker-compose up` で3サービスが起動
 
 - [ ] 5. ランダム対戦相手
