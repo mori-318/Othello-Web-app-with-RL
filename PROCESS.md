@@ -16,7 +16,7 @@
 
 - ブラウザ(React/TS)
   - REST APIで対戦作成・履歴取得
-  - WebSocketで対戦中の盤面更新（PvP/Agent対戦のリアルタイム同期）
+  - ホットシート（同一PC二人対戦）ではWebSocket不要。手番交代はRESTの応答で最新状態を反映
 - バックエンド(FastAPI)
   - ドメイン: オセロ盤面/合法手/反転/終局判定
   - セッション管理: `match_id` ごとのゲーム状態
@@ -27,14 +27,14 @@
   - テーブル: `matches`（メタ）、`moves`（棋譜詳細）もしくは`matches.moves_json`で一括
 
 通信:
-- REST: 対戦開始/手の送信/履歴取得
-- WebSocket: 局面Push、相手手の通知、PvP同期
+- REST: 対戦開始/手の送信/履歴取得（ホットシートはこれで十分）
+- WebSocket: 現状不要（ホットシート要件）。オンライン対戦導入時に検討
 
 ### 参考ディレクトリ構成（提案）
 
 - `backend/`
   - `app/main.py`（FastAPI起動）
-  - `app/api/v1/`（ルータ: matches, moves, history, ws）
+  - `app/api/v1/`（ルータ: matches, moves, history）
   - `app/domain/othello/`（盤面/ルールエンジン）
   - `app/agents/`（`agent_policy.py`, `random_policy.py`, `rl_policy.py`）
   - `app/schemas/`（pydanticモデル）
@@ -45,7 +45,7 @@
 - `frontend/`
   - `src/components/Board.tsx`, `Controls.tsx`, `HistoryTable.tsx`
   - `src/pages/Game.tsx`, `src/pages/History.tsx`, `src/pages/Home.tsx`
-  - `src/api/client.ts`（REST/WSクライアント）
+  - `src/api/client.ts`（RESTクライアント）
   - `src/state/`（Zustand/Redux 等）
   - `tests/`（unit with vitest）, `e2e/`（Playwright）
   - `Dockerfile`, `vite.config.ts`, `tsconfig.json`
@@ -59,7 +59,7 @@
 
 - `Color`: `black` | `white`
 - `Player`: human or agent
-- `OpponentType`: `random` | `agent` | `pvp`
+- `OpponentType`: `random` | `agent` | `pvp`（同一PCホットシート）
 - `Board`: 8x8、`apply_move()`, `legal_moves()`, `is_game_over()`, `score()`
 - `Move`: `(row, col)`
 - `GameState`: `board`, `turn`, `legal_moves`, `history`
@@ -88,9 +88,7 @@ DBスキーマ（簡易案）
   - res: 現在の `GameState`
 - `GET /api/v1/history?limit=&offset=&opponent_type=&from=&to=`
   - res: マッチの一覧
-- `WS /ws/matches/{match_id}`
-  - メッセージ: `state_update`, `opponent_move`, `game_over`
-
+- WebSocket: 現状は未提供（ホットシート要件のため不要）。オンライン対戦を導入する際に設計。
 契約の安定化:
 - OpenAPIでスキーマ確定後、フロントと契約テストを実施
 
@@ -100,7 +98,7 @@ DBスキーマ（簡易案）
 
 - `RandomPolicy`：合法手から一様ランダム選択
 - `RLPolicy`：保存済みモデル（例: PyTorch）をロードして推論。CPU/軽量化前提。失敗時は`RandomPolicy`にフォールバック
-- `PvP`：両クライアントをWebSocketで同期（サーバは盤面の単一ソース）
+- `PvP`：同一PCで交互入力（ホットシート）。サーバは状態の単一ソース。
 
 推論レイテンシ対策:
 - 非同期キュー化、推論タイムアウト、事前ロード
@@ -120,7 +118,7 @@ DBスキーマ（簡易案）
   - `Board`描画、クリックで座標算出、合法手ハイライト
 - E2E（Playwright）
   - ランダム対戦開始→数手進む→終局→履歴に現れる
-  - PvP: 二つのブラウザセッションで同期
+  - PvP: 同一画面で交互に手を入力し、手番表示・終局まで進行
 - プロパティテスト（任意, hypothesis）
   - 反転の可逆性、終局時に合法手なし、など
 - パフォーマンステスト
@@ -132,8 +130,8 @@ DBスキーマ（簡易案）
 
 - ロギング: リクエストID, `match_id`, 盤面遷移(要約), 推論時間
 - メトリクス: 対戦数、平均手数、勝率、推論時間
-- エラーハンドリング: 不正手/タイムアウト/WS切断
-- セキュリティ: CORS制限、レート制限(任意)、PvPの簡易トークン
+- エラーハンドリング: 不正手/タイムアウト/リロード時の復元
+- セキュリティ: CORS制限、レート制限(任意)
 
 ---
 
@@ -189,11 +187,11 @@ DBスキーマ（簡易案）
   - [ ] APIテスト: 不正手→400, 合法→200, 応答内に相手手
   - 確認: UIから数手進行できる
 
-- [ ] 6. PvP（WebSocket）
-  - [ ] `WS /ws/matches/{id}` 実装（入室/更新/退出）
-  - [ ] 2クライアントで同期再現
-  - [ ] E2E（Playwright）でPvPシナリオ
-  - 確認: 2タブで手番が同期し終局まで進行
+- [ ] 6. PvP（ホットシート／同一PC）
+  - [ ] フロントに手番表示・交互入力処理
+  - [ ] パス判定とUI（置けない場合のガイダンス）
+  - [ ] E2E（Playwright）でPvPシナリオ（同一画面）
+  - 確認: 同一PCで交互に手を入力し終局まで進行し、履歴保存される
 
 - [ ] 7. 履歴保存（DB）
   - [ ] 対戦終了時に `matches.moves_json` へ保存
@@ -241,7 +239,7 @@ DBスキーマ（簡易案）
 
 - RL推論のレイテンシ: 事前ロード/軽量モデル/フォールバック
 - 同時手入力の競合: サーバを唯一の状態源とし、`move`を楽観制御ではなくサーバ決定
-- PvP接続切断: タイムアウト/再接続/リジューム（局面再取得）
+- ブラウザリロードで進行中対戦の喪失: サーバ保存/`match_id`で復元し、フロントは再取得UIを提供
 - データ肥大: `moves_json`を要約し、古い棋譜のアーカイブ
 
 ---
