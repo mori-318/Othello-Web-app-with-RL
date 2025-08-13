@@ -161,10 +161,10 @@ DBスキーマ（簡易案）
   - [x] pytestで網羅的ユニットテスト
   - 確認: `pytest -q` が緑、境界ケース（角、端、全埋め）が通る
 
-- [ ] 2. APIスケルトン（`/api/v1`）
-  - [ ] `POST /matches`, `POST /matches/{id}/move`, `GET /matches/{id}`
-  - [ ] pydanticスキーマ、OpenAPIドキュメント
-  - [ ] TestClientでAPIユニット/結合テスト
+- [x] 2. APIスケルトン（`/api/v1`）
+  - [x] `POST /matches`, `POST /matches/{id}/move`, `GET /matches/{id}`
+  - [x] pydanticスキーマ、OpenAPIドキュメント
+  - [x] TestClientでAPIユニット/結合テスト
   - 確認: OpenAPI検証OK、契約テスト通過
 
 - [ ] 3. フロントエンド足場（React/Vite/TS）
