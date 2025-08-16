@@ -48,7 +48,7 @@ def get_match(match_id: str):
     """
     try:
         m = service.get(match_id)
-    except KeyError:
+    except ValueError:
         raise HTTPException(status_code=404, detail="Match not found")
     return _to_state(m)
 

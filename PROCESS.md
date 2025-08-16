@@ -168,6 +168,7 @@ DBスキーマ（簡易案）
   - 確認: OpenAPI検証OK、契約テスト通過
 
 - [ ] 3. フロントエンド足場（React/Vite/TS）
+  - [x] 初期ディレクトリ作成（`src/components/`, `src/pages/`, `src/api/`, `src/state/`, `src/hooks/`, `src/styles/`, `src/types/`, `tests/`, `e2e/`）
   - [ ] 画面: Home（対戦開始設定）、Game（盤面/操作）、History
   - [ ] `Board`コンポーネント（クリックで座標→API）
   - [ ] 簡易スタイル（Tailwind/Chakra 任意）

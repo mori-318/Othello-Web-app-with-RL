@@ -1,30 +1,29 @@
-import { useState } from 'react'
-
-// APIベースURLは, .env.development で定義されている
-const BASE = import.meta.env.VITE_API_BASE_URL ?? ''
-
-// APIレスポンスの型
-type MatchState = {
-    id:          string
-    board:       number[][]
-    player:      number
-    legal_moves: number[][]
-    over:        boolean
-    score:       {black: number, white: number}
-    opponent:    string
-    winner:      number | null
-}
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import Home from "./pages/Home";
+import Game from "./pages/Game";
+import History from "./pages/History";
 
 function App() {
-    
-    const [ready] = useState(true)
     return (
-        <div style={{ padding: 16 }}>
-            <h1>Othello Frontend</h1>
-            <p>初期化完了。次のステップでAPI連携を実装します。</p>
-            {ready && <small>Powered by Vite + React + TS</small>}
-        </div>
-    )
+        <BrowserRouter>
+            <div style={{ padding: 16, maxWidth: 960, margin: "0 auto" }}>
+                <header style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                    <h1 style={{ margin: 0 }}>Othello</h1>
+                    <nav style={{ display: "flex", gap: 12 }}>
+                        <Link to="/">Home</Link>
+                        <Link to="/history">History</Link>
+                    </nav>
+                </header>
+                <main style={{ marginTop: 16 }}>
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/game" element={<Game />} />
+                        <Route path="/history" element={<History />} />
+                    </Routes>
+                </main>
+            </div>
+        </BrowserRouter>
+    );
 }
 
 export default App
